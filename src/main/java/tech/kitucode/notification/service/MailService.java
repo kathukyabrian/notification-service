@@ -27,14 +27,14 @@ public class MailService {
 
 
     @Async
-    public void sendRawMessage(String to, String subject, String body) throws MessagingException {
+    public void sendRawMessage(String to,String cc, String subject, String body) throws MessagingException {
         logger.debug("About to send email to : {}",to);
 
-        sendEmail(to, subject,body,false,false);
+        sendEmail(to, cc, subject,body,false,false);
     }
 
     @Async
-    public void sendEmail(String to, String subject, String body, boolean isMultiPart, boolean isHtml) throws MessagingException{
+    public void sendEmail(String to, String cc, String subject, String body, boolean isMultiPart, boolean isHtml) throws MessagingException{
         logger.info("Request to send email to : {}",to);
 
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
@@ -44,6 +44,8 @@ public class MailService {
         mimeMessageHelper.setSubject(subject);
 
         mimeMessageHelper.setTo(to);
+
+        mimeMessageHelper.setCc(cc);
 
         mimeMessageHelper.setText(body, isHtml);
 

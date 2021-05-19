@@ -20,24 +20,23 @@ public class NotificationService {
     
     public void sendRawEmail(RawMessageDTO rawMessageDTO) throws Exception {
 
-        // check for null values
-        if(rawMessageDTO.getEmailTo()==null || rawMessageDTO.getEmailTo().isEmpty()){
-            throw new Exception("Destination email cannot be null or empty");
-        }
+        validateInput(rawMessageDTO.getEmailTo(),"recipient address");
 
-        if(rawMessageDTO.getMessage()==null || rawMessageDTO.getMessage().isEmpty()){
-            throw new Exception("Message cannot be null or empty");
-        }
+        validateInput(rawMessageDTO.getMessage(), "message");
 
-        if(rawMessageDTO.getSubject()==null || rawMessageDTO.getSubject().isEmpty()){
-            throw new Exception("Message cannot be null or empty");
-        }
+        validateInput(rawMessageDTO.getSubject(), "subject");
 
         try{
-            mailService.sendRawMessage(rawMessageDTO.getEmailTo(), rawMessageDTO.getSubject(), rawMessageDTO.getMessage());
+            mailService.sendRawMessage(rawMessageDTO.getEmailTo(), rawMessageDTO.getCc(), rawMessageDTO.getSubject(), rawMessageDTO.getMessage());
         }catch(MessagingException e){
             e.printStackTrace();
         }
 
+    }
+
+    public void validateInput(String input, String key) throws Exception {
+        if(input==null || input.isEmpty()){
+            throw new Exception(key+" cannot be null or empty");
+        }
     }
 }

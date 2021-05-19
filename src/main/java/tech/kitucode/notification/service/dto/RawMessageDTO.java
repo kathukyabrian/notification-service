@@ -8,6 +8,8 @@ public class RawMessageDTO {
 
     private String message;
 
+    private String cc;
+
     public String getEmailTo() {
         return emailTo;
     }
@@ -32,12 +34,21 @@ public class RawMessageDTO {
         this.message = message;
     }
 
+    public String getCc() {
+        return cc;
+    }
+
+    public void setCc(String cc) {
+        this.cc = cc;
+    }
+
     @Override
     public String toString() {
         return "RawMessageDTO{" +
                 "emailTo='" + emailTo + '\'' +
                 ", subject='" + subject + '\'' +
                 ", message='" + message + '\'' +
+                ", cc='" + cc + '\'' +
                 '}';
     }
 }
