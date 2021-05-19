@@ -9,21 +9,35 @@ import javax.mail.MessagingException;
 
 @Service
 public class NotificationService {
-
+    
     private final Logger logger = LoggerFactory.getLogger(NotificationService.class);
-
+    
     private final MailService mailService;
 
     public NotificationService(MailService mailService) {
         this.mailService = mailService;
     }
-
+    
     public void sendRawEmail(RawMessageDTO rawMessageDTO) throws Exception {
+
         // check for null values
-        if(rawMessageDTO.getEmailTo()!=null && rawMessageDTO.getMessage()!=null && rawMessageDTO.getSubject()!=null ){
-            mailService.sendRawMessage(rawMessageDTO.getEmailTo(), rawMessageDTO.getSubject(), rawMessageDTO.getMessage());
-        }else{
-            throw new Exception("Null values are not allowed");
+        if(rawMessageDTO.getEmailTo()==null || rawMessageDTO.getEmailTo().isEmpty()){
+            throw new Exception("Destination email cannot be null or empty");
         }
+
+        if(rawMessageDTO.getMessage()==null || rawMessageDTO.getMessage().isEmpty()){
+            throw new Exception("Message cannot be null or empty");
+        }
+
+        if(rawMessageDTO.getSubject()==null || rawMessageDTO.getSubject().isEmpty()){
+            throw new Exception("Message cannot be null or empty");
+        }
+
+        try{
+            mailService.sendRawMessage(rawMessageDTO.getEmailTo(), rawMessageDTO.getSubject(), rawMessageDTO.getMessage());
+        }catch(MessagingException e){
+            e.printStackTrace();
+        }
+
     }
 }
