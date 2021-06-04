@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import tech.kitucode.notification.domain.Event;
 import tech.kitucode.notification.service.NotificationService;
 import tech.kitucode.notification.service.dto.RawMessageDTO;
 
@@ -26,5 +27,12 @@ public class NotificationResource {
         logger.debug("About to send email to : {}",rawMessageDTO.getEmailTo());
 
         notificationService.sendRawEmail(rawMessageDTO);
+    }
+
+    @PostMapping("/email/special")
+    public void sendSpecialEmail(@RequestBody Event event){
+        logger.debug("About to send special email to : {}",event.getOwnerEmail());
+
+        notificationService.sendSpecialEventEmail(event);
     }
 }
