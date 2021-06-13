@@ -29,10 +29,4 @@ public class NotificationResource {
         notificationService.sendRawEmail(rawMessageDTO);
     }
 
-    @PostMapping("/email/special")
-    public void sendSpecialEmail(@RequestBody Event event){
-        logger.debug("About to send special email to : {}",event.getOwnerEmail());
-
-        notificationService.sendSpecialEventEmail(event);
-    }
 }

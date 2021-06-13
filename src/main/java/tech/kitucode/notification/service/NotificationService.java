@@ -7,8 +7,13 @@ import tech.kitucode.notification.domain.Event;
 import tech.kitucode.notification.repository.EventRepository;
 import tech.kitucode.notification.service.dto.RawMessageDTO;
 
+import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class NotificationService {
@@ -21,10 +26,17 @@ public class NotificationService {
 
     private final EventRepository eventRepository;
 
+    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+
     public NotificationService(MailService mailService, EventService eventService, EventRepository eventRepository) {
         this.mailService = mailService;
         this.eventService = eventService;
         this.eventRepository = eventRepository;
+    }
+
+    @PostConstruct
+    public void init(){
+        this.executorService.scheduleWithFixedDelay(this::sendSpecialEventEmail,1,1440, TimeUnit.MINUTES);
     }
     
     public void sendRawEmail(RawMessageDTO rawMessageDTO) throws Exception {
@@ -45,7 +57,7 @@ public class NotificationService {
 
     }
 
-    public void sendSpecialEventEmail(Event event){
+    public void sendSpecialEventEmail(){
         /*
           this is a special event email eg birthday emails
           we need to schedule these events for it to happen.....
@@ -56,27 +68,37 @@ public class NotificationService {
 
         String subject = "Special Message from Brian";
 
-        try{
-            // send message
-            mailService.sendSpecialMessage(event.getOwnerEmail(),subject,event.getOwner(),event.getMessage());
+        Iterable<Event> events = eventRepository.findAll();
 
-            // update the event -> reschedule
-            if(event.getReschedule()==Boolean.TRUE){
-                // reschedule
-                Event event1 = eventService.reschedule(event);
+        for(Event event:events){
+            if(event.getEventDate().equals(LocalDate.now())){
 
-                // set current time as last notification time
-                event1.setLastNotificationTime(LocalDateTime.now());
+                logger.debug("About to send email for event : {}",event.getEventName());
 
-                // save
-                eventRepository.save(event1);
+                try{
+                    // send message
+                    mailService.sendSpecialMessage(event.getOwnerEmail(),subject,event.getOwner(),event.getMessage());
+
+                    // update the event -> reschedule
+                    if(event.getReschedule()==Boolean.TRUE){
+                        // reschedule
+                        Event event1 = eventService.reschedule(event);
+
+                        // set current time as last notification time
+                        event1.setLastNotificationTime(LocalDateTime.now());
+
+                        // save
+                        eventRepository.save(event1);
+                    }
+                }catch (MessagingException e){
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }else{
+                logger.debug("No event to send email for");
             }
-        }catch (MessagingException e){
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-
 
     }
 
